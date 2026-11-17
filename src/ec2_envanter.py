@@ -2,7 +2,7 @@ import argparse
 import csv
 
 import boto3
-from botocore.exceptions import ClientError, NoCredentialsError
+from botocore.exceptions import ClientError, EndpointConnectionError, NoCredentialsError, ProfileNotFound
 
 
 def ec2_instance_listele(bolge):
@@ -35,8 +35,14 @@ def main():
 
     try:
         satirlar = ec2_instance_listele(args.bolge)
+    except ProfileNotFound as e:
+        print(f"Hata: AWS profili bulunamadı: {e}")
+        return
     except NoCredentialsError:
         print("Hata: AWS kimlik bilgisi bulunamadı. 'aws configure' ile yapılandırın.")
+        return
+    except EndpointConnectionError:
+        print(f"Hata: '{args.bolge}' bölgesine bağlanılamadı. Bölge adını kontrol edin.")
         return
     except ClientError as e:
         kod = e.response["Error"]["Code"]
